@@ -1,304 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Music Manager - Verification</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>YouTube Fullscreen Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      overflow: hidden;
-      position: relative;
+      background: black;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
-    .hidden { display: none; }
-    .verification-modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000;
+
+    .controls {
+      background: #111;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
     }
-    .verification-content {
-      background: white; padding: 2rem; border-radius: 1rem; max-width: 420px; width: 92%; text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
     }
-    .captcha-code {
-      background: #f0f9ff; border: 2px dashed #4facfe; padding: 1rem; border-radius: .5rem;
-      font-size: 1.6rem; font-weight: 700; color: #1e3a8a; letter-spacing: 4px; margin: 1rem 0; user-select: none;
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: red;
+      color: white;
+      font-weight: bold;
     }
-    .status-message { display: none; padding: 1rem; border-radius: .5rem; margin-top: .8rem; text-align:center; transition: all .25s ease; }
-    
-    /* Sistema de Linterna Mejorado */
-    #spotlight {
-      position: fixed;
-      top: 0;
-      left: 0;
+
+    .video-container {
+      flex: 1;
+    }
+
+    iframe {
       width: 100%;
       height: 100%;
-      pointer-events: none;
-      background: radial-gradient(
-        circle at var(--x, 50%) var(--y, 50%),
-        transparent 0px,
-        rgba(0, 0, 0, 0.75) 300px,
-        rgba(0, 0, 0, 0.9) 100%
-      );
-      z-index: 5;
-      transition: background 0.2s ease;
-      mix-blend-mode: multiply;
-    }
-    
-    /* Contenedor de motas de polvo */
-    #dust-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2;
-    }
-    
-    /* Estilo para cada mota de polvo */
-    .dust-particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 2;
-      animation: float 15s infinite linear;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Animación de flotación para las motas */
-    @keyframes float {
-      0% {
-        transform: translateY(0) translateX(0) rotate(0deg);
-        opacity: 0.7;
-      }
-      25% {
-        transform: translateY(-20px) translateX(10px) rotate(90deg);
-        opacity: 0.9;
-      }
-      50% {
-        transform: translateY(-40px) translateX(-5px) rotate(180deg);
-        opacity: 0.7;
-      }
-      75% {
-        transform: translateY(-20px) translateX(-10px) rotate(270deg);
-        opacity: 0.5;
-      }
-      100% {
-        transform: translateY(0) translateX(0) rotate(360deg);
-        opacity: 0.7;
-      }
-    }
-    
-    /* Asegurar que el contenido esté por encima de la linterna */
-    .content-container {
-      position: relative;
-      z-index: 10;
-    }
-    
-    /* Cambiar color de selección a negro */
-    ::selection {
-      background: #000000;
-      color: #ffffff;
-    }
-    
-    /* Para navegadores basados en Webkit (Chrome, Safari, etc.) */
-    ::-moz-selection {
-      background: #000000;
-      color: #ffffff;
-    }
-    
-    /* Para navegadores basados en Mozilla (Firefox) */
-    ::-webkit-selection {
-      background: #000000;
-      color: #ffffff;
+      border: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Sistema de Linterna -->
-  <div id="spotlight"></div>
-  
-  <!-- Contenedor de motas de polvo -->
-  <div id="dust-container"></div>
-
-  <!-- Modal CAPTCHA -->
-  <div id="verification-modal" class="verification-modal hidden">
-    <div class="verification-content">
-      <h2 class="text-2xl font-bold mb-2 text-cyan-500">Verification Required</h2>
-      <p class="mb-3 text-gray-600">Introduce un nombre de sesión y el código que aparece abajo:</p>
-
-      <!-- Input para nombre de sesión -->
-      <input id="session-name" type="text" placeholder="Nombre de sesión (ej. Pepe123)"
-             class="w-full px-4 py-3 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:outline-none text-center" />
-
-      <div id="captcha-code" class="captcha-code">-----</div>
-
-      <input id="captcha-input" type="text" placeholder="Introduce el código" maxlength="6"
-             class="w-full px-4 py-3 mb-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:outline-none text-center uppercase tracking-wider" />
-
-      <div class="flex gap-2 mb-3">
-        <button id="verify-btn" class="flex-1 bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-all">Verify</button>
-        <button id="refresh-captcha" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all">Refresh</button>
-      </div>
-
-      <button id="cancel-verify-btn" class="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
-    </div>
+  <div class="controls">
+    <input type="text" id="urlInput" placeholder="Pega URL de YouTube aquí">
+    <button onclick="loadVideo()">Reproducir</button>
   </div>
 
-  <!-- Caja principal -->
-  <div class="content-container">
-    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md shadow-2xl text-center">
-      <i class="fas fa-music text-5xl text-cyan-300 mb-4"></i>
-      <h1 class="text-3xl font-bold text-white mb-2">Music Manager</h1>
-      <p class="text-white/70 mb-6">Simple verification before entering</p>
-
-      <button id="start-btn"
-              class="px-6 py-3.5 rounded-lg bg-cyan-400 text-white font-medium cursor-pointer transition-all hover:bg-cyan-500 transform hover:-translate-y-0.5">
-        Continue
-      </button>
-
-      <div id="status-message" class="status-message"></div>
-    </div>
-  </div>
+  <div class="video-container" id="videoContainer"></div>
 
   <script>
-    // Elementos
-    const modal = document.getElementById('verification-modal');
-    const captchaCodeEl = document.getElementById('captcha-code');
-    const captchaInput = document.getElementById('captcha-input');
-    const statusMsg = document.getElementById('status-message');
-    const startBtn = document.getElementById('start-btn');
-    const refreshBtn = document.getElementById('refresh-captcha');
-    const verifyBtn = document.getElementById('verify-btn');
-    const cancelBtn = document.getElementById('cancel-verify-btn');
-    const sessionNameEl = document.getElementById('session-name');
-    const spotlight = document.getElementById('spotlight');
-    const dustContainer = document.getElementById('dust-container');
+    function extractVideoID(url) {
+      try {
+        const urlObj = new URL(url);
 
-    let currentCode = '';
+        if (urlObj.hostname.includes("youtube.com")) {
+          return urlObj.searchParams.get("v");
+        }
 
-    // Crear motas de polvo
-    function createDustParticles() {
-      const particleCount = 60;
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('dust-particle');
-        
-        // Tamaño aleatorio entre 1px y 5px
-        const size = Math.random() * 4 + 1;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // Posición aleatoria en la pantalla
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // Animación con duración y retardo aleatorios
-        const duration = Math.random() * 20 + 10;
-        const delay = Math.random() * 15;
-        particle.style.animationDuration = `${duration}s`;
-        particle.style.animationDelay = `${delay}s`;
-        
-        dustContainer.appendChild(particle);
+        if (urlObj.hostname.includes("youtu.be")) {
+          return urlObj.pathname.slice(1);
+        }
+
+      } catch (e) {
+        return null;
       }
+
+      return null;
     }
 
-    // Sistema de linterna - actualizar posición según el cursor
-    document.addEventListener('mousemove', (e) => {
-      spotlight.style.setProperty('--x', `${e.clientX}px`);
-      spotlight.style.setProperty('--y', `${e.clientY}px`);
-    });
+    function loadVideo() {
+      const url = document.getElementById("urlInput").value.trim();
+      const videoID = extractVideoID(url);
 
-    // También actualizar en dispositivos táctiles
-    document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      spotlight.style.setProperty('--x', `${touch.clientX}px`);
-      spotlight.style.setProperty('--y', `${touch.clientY}px`);
-    });
-
-    // Genera CAPTCHA de 5 caracteres alfanuméricos
-    function generateCaptcha() {
-      currentCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-      captchaCodeEl.textContent = currentCode;
-    }
-
-    // Abrir modal (se genera código)
-    function openCaptchaModal() {
-      generateCaptcha();
-      captchaInput.value = '';
-      sessionNameEl.value = '';
-      statusMsg.style.display = 'none';
-      modal.classList.remove('hidden');
-      sessionNameEl.focus();
-    }
-
-    // Cerrar modal
-    function closeCaptchaModal() {
-      modal.classList.add('hidden');
-    }
-
-    // Manejar verificación: si coincide el código -> guardar currentUser solo si hay session-name
-    function handleVerification() {
-      const typed = captchaInput.value.trim().toUpperCase();
-      const sessionName = sessionNameEl.value.trim();
-
-      if (typed !== currentCode) {
-        statusMsg.innerHTML = '<span class="text-red-400">❌ Código incorrecto. Se ha generado uno nuevo.</span>';
-        statusMsg.style.display = 'block';
-        generateCaptcha();
-        captchaInput.value = '';
+      if (!videoID) {
+        alert("URL no válida");
         return;
       }
 
-      // Código correcto: almacenamos currentUser sólo si hay nombre de sesión
-      if (sessionName) {
-        const userObj = {
-          email: sessionName,    // reuso la propiedad 'email' para que dashboard no necesite cambios
-          isAdmin: false,
-          sessionName: sessionName,
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('currentUser', JSON.stringify(userObj));
-      } else {
-        // Si no hay nombre de sesión, aseguramos que no exista currentUser
-        localStorage.removeItem('currentUser');
-      }
+      const embedUrl = `https://www.youtube.com/embed/${videoID}?autoplay=1&rel=0`;
 
-      // Redirigir siempre al dashboard: si currentUser no existe, el dashboard hará la redirección de vuelta.
-      closeCaptchaModal();
-      statusMsg.innerHTML = '<span class="text-green-400">✅ Verificado. Redirigiendo...</span>';
-      statusMsg.style.display = 'block';
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 700);
+      const container = document.getElementById("videoContainer");
+      container.innerHTML = `
+        <iframe 
+          src="${embedUrl}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowfullscreen>
+        </iframe>
+      `;
     }
-
-    // Eventos
-    startBtn.addEventListener('click', openCaptchaModal);
-    refreshBtn.addEventListener('click', generateCaptcha);
-    verifyBtn.addEventListener('click', handleVerification);
-    cancelBtn.addEventListener('click', closeCaptchaModal);
-
-    // Enter para confirmar
-    captchaInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleVerification(); });
-    sessionNameEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') captchaInput.focus(); });
-
-    // Generar uno inicialmente (opcional)
-    generateCaptcha();
-    
-    // Crear las motas de polvo al cargar la página
-    createDustParticles();
   </script>
+
 </body>
 </html>
