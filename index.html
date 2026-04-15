@@ -2,536 +2,718 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Nebulosa Creativa | Tu espacio personal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nebulosa · Juego de sombras</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* Evita selección molesta, pero el texto editable sí se puede seleccionar */
+            user-select: none;
         }
 
         body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a0f2a, #03050b);
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 10%, #0a0f2a, #020115);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            padding: 2rem 1.5rem;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 2rem;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Partículas de fondo animadas (estrellas brillantes) */
-        .star {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: twinkle 3s infinite alternate;
-            box-shadow: 0 0 6px rgba(180, 130, 255, 0.8);
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0.2; transform: scale(1);}
-            100% { opacity: 1; transform: scale(1.2);}
+            align-items: center;
+            min-height: 100vh;
         }
 
         /* contenedor principal */
-        .glass-card {
-            background: rgba(12, 15, 40, 0.55);
-            backdrop-filter: blur(12px);
+        .main-container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(8, 10, 28, 0.5);
+            backdrop-filter: blur(4px);
             border-radius: 3rem;
-            border: 1px solid rgba(110, 80, 200, 0.5);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 20px rgba(100, 70, 200, 0.3);
-            width: 100%;
-            max-width: 850px;
-            padding: 2rem 2rem 2.2rem;
-            transition: transform 0.25s ease, box-shadow 0.3s ease;
-            animation: floatIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            padding: 1.8rem;
+            border: 1px solid rgba(130, 90, 230, 0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 55px rgba(0, 0, 0, 0.6), 0 0 25px rgba(130, 90, 230, 0.5);
-        }
-
-        @keyframes floatIn {
-            0% { opacity: 0; transform: scale(0.96) translateY(30px);}
-            100% { opacity: 1; transform: scale(1) translateY(0);}
-        }
-
-        /* encabezado con animación de gradiente */
-        .title-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .title-section h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #b2a4ff, #6c4fcb, #3c2a7a);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: shine 5s linear infinite;
-            letter-spacing: -0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        @keyframes shine {
-            0% { background-position: 0% 50%;}
-            50% { background-position: 100% 50%;}
-            100% { background-position: 0% 50%;}
-        }
-
-        .sub {
-            color: #b1a5e6;
-            font-weight: 400;
-            border-bottom: 1px dashed #5f48b3;
-            display: inline-block;
-            padding-bottom: 6px;
-            font-size: 1rem;
-        }
-
-        /* zona de escritura mágica */
-        .editor-area {
-            margin: 1.8rem 0;
-        }
-
-        .writing-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #ccc2ff;
-            font-weight: 500;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-        }
-
-        .writing-label i {
-            font-style: normal;
-            font-size: 1.3rem;
-        }
-
-        .magic-input {
-            width: 100%;
-            min-height: 220px;
-            background: rgba(8, 10, 28, 0.75);
-            border: 1.5px solid #4a3790;
-            border-radius: 28px;
-            padding: 1.4rem 1.5rem;
-            color: #f0eaff;
-            font-size: 1.05rem;
-            line-height: 1.55;
-            font-family: 'Segoe UI', 'Fira Code', monospace;
-            resize: vertical;
-            outline: none;
-            transition: all 0.2s;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 5px rgba(110, 70, 210, 0.3);
-        }
-
-        .magic-input:focus {
-            border-color: #9a7dff;
-            box-shadow: 0 0 15px rgba(130, 100, 240, 0.6), inset 0 1px 4px #00000055;
-            background: rgba(5, 7, 22, 0.85);
-        }
-
-        /* botones con sonido y animaciones */
-        .button-panel {
+        /* zona superior: botón + mensaje personal */
+        .top-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            margin: 2rem 0 1rem;
-        }
-
-        .cute-btn {
-            background: linear-gradient(135deg, #1e1a45, #110c2c);
-            border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #e2d6ff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 0 #0b0820;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(4px);
-            letter-spacing: 0.5px;
-        }
-
-        .cute-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 3px 0 #0b0820;
-        }
-
-        .cute-btn:hover {
-            background: linear-gradient(135deg, #322b6e, #1f1952);
-            color: white;
-            text-shadow: 0 0 3px #bbaaff;
-            box-shadow: 0 6px 0 #0b0820, 0 0 12px #7b5eff;
-        }
-
-        /* botón especial brillo */
-        .glow-btn {
-            background: linear-gradient(135deg, #5e43c7, #341f84);
-            box-shadow: 0 6px 0 #1b123f, 0 0 8px #a07eff;
-        }
-
-        /* contador de palabras / caracteres */
-        .stats {
-            display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
             background: rgba(0, 0, 0, 0.35);
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+        }
+
+        .hola-btn {
+            background: linear-gradient(135deg, #6c4bcb, #3f2a7a);
+            border: none;
+            padding: 0.6rem 1.8rem;
             border-radius: 40px;
-            font-size: 0.85rem;
-            color: #b9abf0;
+            font-weight: bold;
+            color: #f0e9ff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #1f1742;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
         }
 
-        .badge {
-            background: #2b235a;
-            padding: 0.2rem 0.8rem;
-            border-radius: 50px;
-            font-family: monospace;
+        .hola-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1f1742;
         }
 
-        /* animación sutil para el texto cuando se limpia */
-        @keyframes gentlePop {
-            0% { transform: scale(1); opacity: 0.9;}
-            100% { transform: scale(1);}
+        .personal-text {
+            background: rgba(25, 20, 55, 0.7);
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            color: #cfc2ff;
+            border-left: 3px solid #a47eff;
+            max-width: 60%;
         }
 
-        .pop-effect {
-            animation: gentlePop 0.2s ease;
+        .personal-text span {
+            font-weight: bold;
+            color: #bbaaff;
+        }
+
+        /* zona de edición (lo que el creador escribe directamente en HTML) */
+        .message-box {
+            background: #0b0d26cc;
+            border-radius: 2rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #5f4bbe;
+            backdrop-filter: blur(8px);
+        }
+
+        .message-box p {
+            font-size: 1.15rem;
+            line-height: 1.4;
+            color: #e9dfff;
+            white-space: pre-wrap;
+        }
+
+        .edit-note {
+            font-size: 0.7rem;
+            color: #7c6fbb;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        /* área del juego */
+        .game-wrapper {
+            background: #03041ac9;
+            border-radius: 2rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #826eff;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 0 12px;
+            font-weight: bold;
+            color: #cdbef5;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 24px;
+            box-shadow: 0 0 0 2px #2e2366, 0 10px 25px black;
+            cursor: crosshair;
+            background: #13142e;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #00000055;
+            border-radius: 60px;
+        }
+
+        .level-badge {
+            background: #2f2670;
+            padding: 4px 14px;
+            border-radius: 40px;
+        }
+
+        .phrase-area {
+            background: #211c44;
+            padding: 6px 12px;
+            border-radius: 28px;
+            font-size: 0.9rem;
+            min-height: 48px;
+            text-align: center;
+            color: #f2e9ff;
+        }
+
+        .infinity-mode-tag {
+            font-size: 0.9rem;
+            background: #a55eff33;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+
+        button {
+            background: #312b66;
+            border: none;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s linear;
+        }
+
+        button:active {
+            transform: scale(0.96);
         }
 
         footer {
             text-align: center;
-            margin-top: 1.6rem;
+            margin-top: 20px;
             font-size: 0.7rem;
-            color: #5d539b;
-        }
-
-        /* scroll bonito */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f0c2a;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #6c4bcb;
-            border-radius: 10px;
+            color: #5f559b;
         }
     </style>
 </head>
 <body>
-    <!-- Estrellas dinámicas generadas por JS -->
-    <div id="stars-container"></div>
-
-    <div class="glass-card">
-        <div class="title-section">
-            <h1>✨ lienzo etéreo ✨</h1>
-            <div class="sub">escribe lo que quieras · vibra morada</div>
+<div class="main-container">
+    <div class="top-bar">
+        <button id="holaBtn" class="hola-btn">✨ ¡Hola de nuevo! ✨</button>
+        <div class="personal-text">
+            📜 <span>mensaje especial:</span> “cada clic guarda un recuerdo”
         </div>
-
-        <div class="editor-area">
-            <div class="writing-label">
-                <i>✍️</i> <span>tu espacio personal</span>
-            </div>
-            <textarea id="magicTextarea" class="magic-input" placeholder="📝 Escribe aquí tus pensamientos, frases, poesía, ideas... todo lo que nazca..."></textarea>
-            
-            <div class="stats">
-                <span>🔮 caracteres: <span id="charCount">0</span></span>
-                <span>📖 palabras: <span id="wordCount">0</span></span>
-                <div class="badge">✨ sonidos activados</div>
-            </div>
-        </div>
-
-        <div class="button-panel">
-            <button id="clearBtn" class="cute-btn">🧹 Limpiar todo</button>
-            <button id="copyBtn" class="cute-btn">📋 Copiar texto</button>
-            <button id="magicBtn" class="cute-btn glow-btn">✨ Palabra mágica ✨</button>
-        </div>
-        <footer>
-            💜 clic en cualquier botón → sonido especial | tonos azul profundo & morado
-        </footer>
     </div>
 
-    <script>
-        (function(){
-            // ---------- SONIDOS CON WEB AUDIO API (sintetizador de clicks y efectos) ----------
-            // No necesita archivos externos, funciona al instante y es ligero.
-            let audioCtx = null;
-            
-            function initAudio() {
-                if (audioCtx) return audioCtx;
-                try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    return audioCtx;
-                } catch(e) {
-                    console.warn("Web Audio API no soportada, sonido desactivado");
-                    return null;
-                }
-            }
+    <!-- PÁRRAFO EDITABLE DIRECTAMENTE DESDE HTML (cambia el texto aquí) -->
+    <div class="message-box" id="customMessageBox">
+        <p id="editableParagraph">
+            🌙 <strong>Querida persona:</strong> esto es lo que he escrito para ti.<br>
+            Puedes cambiar este párrafo entero modificando el HTML dentro de &lt;p id="editableParagraph"&gt; ... &lt;/p&gt;<br>
+            ✨ Tú decides qué mensaje dejar aquí, las palabras que quieras compartir. ✨
+        </p>
+        <div class="edit-note">✏️ (edita este texto en el código fuente, dentro de las etiquetas con id "editableParagraph")</div>
+    </div>
 
-            // reproducir un "click" suave pero agradable
-            function playClickSound(pitch = 780, duration = 0.12, volume = 0.25) {
-                let context = initAudio();
-                if (!context) return;
-                // reanudar si está suspendido (por políticas del navegador)
-                if (context.state === 'suspended') {
-                    context.resume().then(() => {
-                        actuallyPlay(context, pitch, duration, volume);
-                    }).catch(e=>console.log);
-                } else {
-                    actuallyPlay(context, pitch, duration, volume);
-                }
-            }
+    <!-- JUEGO DE OBSTÁCULOS + NIVELES -->
+    <div class="game-wrapper">
+        <div class="game-header">
+            <span>⚔️ GOLPEA ENEMIGOS (clic) ⚔️</span>
+            <span id="infinityModeLabel" class="infinity-mode-tag" style="display: none;">♾️ INFINITE MODE</span>
+        </div>
+        <canvas id="gameCanvas" width="1000" height="450" style="width:100%; height:auto; max-width:1000px; aspect-ratio:1000/450"></canvas>
+        <div class="info-panel">
+            <div class="level-badge">🎯 NIVEL <span id="currentLevelNum">1</span></div>
+            <div>💀 Enemigos restantes: <span id="enemiesRemain">0</span></div>
+            <div>🏆 <span id="gameStateMsg">Jugando</span></div>
+        </div>
+        <div id="phraseDisplay" class="phrase-area">🌟 Haz clic en los monstruos para eliminarlos. Completa el nivel 🌟</div>
+    </div>
+    <footer>💜 sonidos activados · clickea enemigos · salta entre edificios (A/D + espacio/W)</footer>
+</div>
 
-            function actuallyPlay(context, pitch, duration, volume) {
-                const now = context.currentTime;
-                const osc = context.createOscillator();
-                const gain = context.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = pitch;
-                gain.gain.value = volume;
-                osc.connect(gain);
-                gain.connect(context.destination);
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
-                osc.stop(now + duration);
-            }
+<script>
+    // --------------------- FRASES PERSONALIZABLES (cámbialas aquí) ---------------------
+    // FRASES PARA CADA NIVEL (se muestra al completar el nivel anterior y comenzar el siguiente)
+    // Nivel 1->2, 2->3 ... hasta nivel 9->10. Después usaremos las dos finales.
+    const levelUpPhrases = {
+        1: "📖 Fase 1: los primeros ecos aparecen...",
+        2: "🌆 La noche te observa, sigue saltando.",
+        3: "⚡ Tus reflejos mejoran, elimínalos rápido.",
+        4: "🌀 Los enemigos se multiplican...",
+        5: "🌙 El cielo se tiñe de oscuridad.",
+        6: "🔥 Ya casi llegas, no pares.",
+        7: "💎 Un susurro entre los edificios.",
+        8: "🎭 La penumbra te reconoce.",
+        9: "✨ Un paso más hacia lo desconocido."
+    };
+    // DOS FRASES FINALES (después de nivel 10)
+    const finalPhrases = [
+        "🏁 ¡Has vencido los 10 niveles! La tormenta se disipa...",
+        "🌌 'El infinito te espera, guerrero de las sombras'"
+    ];
+    // Puedes cambiar las frases arriba ^^ respetando las comillas.
+    // -----------------------------------------------------------------------------------
 
-            // sonido mágico un poco más brillante (para botón mágico)
-            function playMagicSound() {
-                let context = initAudio();
-                if (!context) return;
-                if (context.state === 'suspended') {
-                    context.resume().then(() => magicSoundInternal(context)).catch(e=>console.log);
-                } else {
-                    magicSoundInternal(context);
-                }
-            }
-            function magicSoundInternal(context) {
-                const now = context.currentTime;
-                const osc1 = context.createOscillator();
-                const osc2 = context.createOscillator();
-                const gain = context.createGain();
-                osc1.type = 'sine';
-                osc2.type = 'triangle';
-                osc1.frequency.value = 523.25;  // Do5
-                osc2.frequency.value = 659.25;  // Mi5
-                gain.gain.value = 0.2;
-                osc1.connect(gain);
-                osc2.connect(gain);
-                gain.connect(context.destination);
-                osc1.start();
-                osc2.start();
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-                osc1.stop(now + 0.35);
-                osc2.stop(now + 0.35);
-            }
+    // ---------- OBTENER ELEMENTOS ----------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const levelSpan = document.getElementById('currentLevelNum');
+    const enemiesSpan = document.getElementById('enemiesRemain');
+    const phraseDiv = document.getElementById('phraseDisplay');
+    const gameStateMsgSpan = document.getElementById('gameStateMsg');
+    const infinityLabel = document.getElementById('infinityModeLabel');
 
-            // sonido de copiar (click corto)
-            function playCopySound() {
-                playClickSound(980, 0.09, 0.2);
-            }
-            // sonido limpiar (descendente)
-            function playClearSound() {
-                let context = initAudio();
-                if (!context) return;
-                const resumePlay = () => {
-                    const now = context.currentTime;
-                    const osc = context.createOscillator();
-                    const gain = context.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.value = 500;
-                    gain.gain.value = 0.2;
-                    osc.connect(gain);
-                    gain.connect(context.destination);
-                    osc.start();
-                    osc.frequency.exponentialRampToValueAtTime(220, now + 0.2);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
-                    osc.stop(now + 0.25);
-                };
-                if (context.state === 'suspended') {
-                    context.resume().then(() => resumePlay()).catch(e=>console.log);
-                } else { resumePlay(); }
-            }
+    // ---------- SONIDOS (Web Audio) ----------
+    let audioCtx = null;
+    function initAudio() {
+        if (audioCtx) return audioCtx;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        } catch(e) { console.warn("audio no soportado"); return null; }
+    }
+    function playSound(freq, duration, vol = 0.2, type = 'sine') {
+        const ctxAudio = initAudio();
+        if (!ctxAudio) return;
+        const resumeAndPlay = () => {
+            const now = ctxAudio.currentTime;
+            const osc = ctxAudio.createOscillator();
+            const gain = ctxAudio.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = vol;
+            osc.connect(gain);
+            gain.connect(ctxAudio.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            osc.stop(now + duration);
+        };
+        if (ctxAudio.state === 'suspended') {
+            ctxAudio.resume().then(resumeAndPlay).catch(e=>{});
+        } else { resumeAndPlay(); }
+    }
+    function killSound() { playSound(780, 0.12, 0.25, 'triangle'); }
+    function jumpSound() { playSound(540, 0.1, 0.18, 'sine'); }
+    function levelUpSound() { playSound(880, 0.25, 0.3, 'sine'); setTimeout(()=>playSound(660,0.2,0.2), 100); }
+    function clickUISound() { playSound(680, 0.07, 0.15); }
 
-            // función para "click" en cualquier botón (efecto general)
-            function attachSoundToButtons() {
-                const btns = document.querySelectorAll('.cute-btn');
-                btns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // pequeño sonido de clic base, pero evitamos duplicar para botones que ya tienen sonido propio
-                        // No vamos a sobrecargar: para botón limpiar, copiar y mágico llamaremos funciones específicas después.
-                        // Pero añadimos un micro beep muy sutil solo para el evento de clic general (podría solaparse)
-                        // Para evitar ruido excesivo: no agregamos aquí, los botones tienen su propio sonido personalizado.
-                    });
+    // ---------- CONFIGURACIÓN DEL JUEGO ----------
+    let gameRunning = true;
+    let currentLevel = 1;
+    let enemies = [];
+    let levelClearing = false;     // evita múltiples transiciones
+    let infiniteMode = false;
+    let levelTransitionTimer = null;
+    
+    // Jugador
+    let player = {
+        x: 200, y: 0, vx: 0, vy: 0,
+        width: 20, height: 24,
+        grounded: false,
+        facingRight: true
+    };
+    const GRAVITY = 0.8;
+    const JUMP_POWER = -11;
+    const WALK_ACC = 0.8;
+    const MAX_SPEED = 5;
+    const FRICTION = 0.92;
+
+    // Plataformas (edificios)
+    const platforms = [
+        { x: 80, y: 380, w: 130 },   // edificio 1
+        { x: 280, y: 360, w: 140 },  // edificio 2
+        { x: 500, y: 370, w: 140 },  // edificio 3
+        { x: 730, y: 350, w: 150 },  // edificio 4
+        { x: 920, y: 380, w: 100 }   // edificio 5 (extremo)
+    ];
+    // Altura de dibujo de edificios + plataforma
+    const PLATFORM_Y_OFFSET = 8;
+
+    // Variables de control
+    const keys = { left: false, right: false, jump: false, canJump: true };
+    let mouseX = 0, mouseY = 0;
+
+    // Niveles: cantidad y velocidad enemigos
+    const levelEnemyCount = [0,2,3,4,5,6,7,8,9,10,12]; // índice level -> enemigos
+    function getEnemySpeedForLevel(level) {
+        let base = 0.9;
+        let add = (level-1) * 0.12;
+        return Math.min(base + add, 2.6);
+    }
+
+    // Ajuste de oscuridad cielo (gradiente)
+    let skyDarkness = 0; // 0->1 nivel 10 es casi negro
+    function updateSkyDarkness() {
+        let progress = (currentLevel-1)/9;
+        if (currentLevel>=10) progress = 1;
+        skyDarkness = Math.min(1, progress);
+    }
+
+    // función para reiniciar nivel (enemigos)
+    function spawnEnemiesForLevel() {
+        const count = levelEnemyCount[currentLevel] || 3;
+        const newEnemies = [];
+        const speedVal = getEnemySpeedForLevel(currentLevel);
+        for (let i=0; i<count; i++) {
+            // elegir plataforma aleatoria
+            const plat = platforms[Math.floor(Math.random() * platforms.length)];
+            const enemyX = plat.x + 15 + Math.random() * (plat.w - 40);
+            newEnemies.push({
+                x: enemyX,
+                y: plat.y - 18,   // altura enemigo
+                radius: 14,
+                speed: speedVal,
+                platformId: plat.x, // referencia para movimiento limitado
+                platBounds: { left: plat.x, right: plat.x + plat.w }
+            });
+        }
+        enemies = newEnemies;
+        updateEnemiesUI();
+    }
+
+    function updateEnemiesUI() {
+        enemiesSpan.innerText = enemies.length;
+    }
+
+    // posicionar jugador en plataforma más cercana segura
+    function respawnPlayerSafe() {
+        // buscar plataforma más cercana al centro?
+        let closest = platforms[0];
+        let minDist = Math.abs(player.x - (closest.x+closest.w/2));
+        for (let p of platforms) {
+            let dist = Math.abs(player.x - (p.x+p.w/2));
+            if (dist < minDist) { minDist = dist; closest = p; }
+        }
+        player.x = closest.x + closest.w/2 - player.width/2;
+        player.y = closest.y - player.height;
+        player.vy = 0;
+        player.vx = 0;
+        player.grounded = true;
+    }
+
+    // avanzar de nivel
+    function nextLevel() {
+        if (levelClearing) return;
+        levelClearing = true;
+        if (!infiniteMode && currentLevel === 10) {
+            // FINAL JUEGO: mostrar dos frases seguidas y luego botón infinito
+            gameStateMsgSpan.innerText = "¡VICTORIA!";
+            phraseDiv.innerHTML = `✨ ${finalPhrases[0]} ✨<br>✨ ${finalPhrases[1]} ✨`;
+            levelUpSound();
+            // crear botón modo infinito si no existe
+            if (!document.getElementById('infiniteModeBtn')) {
+                const btnInf = document.createElement('button');
+                btnInf.id = 'infiniteModeBtn';
+                btnInf.innerText = '🌌 MODO INFINITO (sin frases) 🌌';
+                btnInf.style.margin = '10px auto';
+                btnInf.style.display = 'block';
+                btnInf.style.background = '#9f7eff';
+                document.querySelector('.info-panel').after(btnInf);
+                btnInf.addEventListener('click', () => {
+                    clickUISound();
+                    startInfiniteMode();
+                    btnInf.remove();
                 });
             }
+            levelClearing = false;
+            return;
+        }
+        // normal o modo infinito
+        if (infiniteMode) {
+            let next = currentLevel + 1;
+            if (next > 10) next = 1;
+            currentLevel = next;
+            levelSpan.innerText = currentLevel;
+            updateSkyDarkness();
+            spawnEnemiesForLevel();
+            updateEnemiesUI();
+            phraseDiv.innerHTML = `♾️ INFINITE · nivel ${currentLevel} · sin frases ♾️`;
+            gameStateMsgSpan.innerText = "Modo infinito";
+            levelClearing = false;
+            return;
+        }
+        // modo normal (1-10)
+        currentLevel++;
+        if (currentLevel > 10) currentLevel = 10; // por seguridad
+        levelSpan.innerText = currentLevel;
+        updateSkyDarkness();
+        spawnEnemiesForLevel();
+        updateEnemiesUI();
+        // mostrar frase de transición (si existe)
+        let fraseMostrar = levelUpPhrases[currentLevel-1] || `🌟 Nivel ${currentLevel} · más oscuridad 🌟`;
+        phraseDiv.innerHTML = `✨ ${fraseMostrar} ✨`;
+        gameStateMsgSpan.innerText = "Nuevo nivel";
+        levelUpSound();
+        setTimeout(() => {
+            if (!infiniteMode) phraseDiv.innerHTML = "⚔️ Click en enemigos para eliminarlos. Salta entre edificios ⚔️";
+            gameStateMsgSpan.innerText = "Jugando";
+        }, 2000);
+        levelClearing = false;
+    }
 
-            // Elementos DOM
-            const textarea = document.getElementById('magicTextarea');
-            const clearBtn = document.getElementById('clearBtn');
-            const copyBtn = document.getElementById('copyBtn');
-            const magicBtn = document.getElementById('magicBtn');
-            const charSpan = document.getElementById('charCount');
-            const wordSpan = document.getElementById('wordCount');
+    // modo infinito
+    function startInfiniteMode() {
+        infiniteMode = true;
+        currentLevel = 1;
+        levelSpan.innerText = currentLevel;
+        updateSkyDarkness();
+        spawnEnemiesForLevel();
+        updateEnemiesUI();
+        infinityLabel.style.display = 'inline-block';
+        phraseDiv.innerHTML = "♾️ INFINITE LEVELS, LIKE MY INFINITE SORRY ♾️";
+        gameStateMsgSpan.innerText = "∞ INFINITO ∞";
+        levelClearing = false;
+        // eliminar cualquier botón existente
+        const oldBtn = document.getElementById('infiniteModeBtn');
+        if(oldBtn) oldBtn.remove();
+    }
 
-            // Actualizar contador de caracteres y palabras
-            function updateStats() {
-                const text = textarea.value;
-                const chars = text.length;
-                const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
-                charSpan.innerText = chars;
-                wordSpan.innerText = words;
+    // lógica para matar enemigos con click
+    function handleCanvasClick(e) {
+        if (!gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clickX = (e.clientX - rect.left) * scaleX;
+        let clickY = (e.clientY - rect.top) * scaleY;
+        let hitIndex = -1;
+        for (let i=0; i<enemies.length; i++) {
+            const en = enemies[i];
+            const dx = clickX - en.x;
+            const dy = clickY - en.y;
+            const dist = Math.sqrt(dx*dx+dy*dy);
+            if (dist < en.radius+5) {
+                hitIndex = i;
+                break;
             }
-
-            // Añadir animación pop al textarea
-            function animateTextarea() {
-                textarea.classList.add('pop-effect');
-                setTimeout(() => {
-                    textarea.classList.remove('pop-effect');
-                }, 200);
+        }
+        if (hitIndex !== -1) {
+            killSound();
+            enemies.splice(hitIndex,1);
+            updateEnemiesUI();
+            if (enemies.length === 0 && !levelClearing) {
+                // completar nivel
+                nextLevel();
             }
+        } else {
+            // clic en vacío: pequeño sonido neutro
+            playSound(420,0.05,0.1);
+        }
+    }
 
-            // Evento de escritura (actualizar estadísticas)
-            textarea.addEventListener('input', () => {
-                updateStats();
-                // opcional: sonido muy sutil al escribir? No se pidió pero es "sonidos de click y demás", 
-                // mejor un micro sonido al teclear? quizá demasiado. Pero podemos añadir un "tick" muy ligero cada 5 caracteres?
-                // Para no saturar, lo dejamos opcional: no incluyo sonido al escribir porque podría ser molesto.
-            });
-
-            // BOTÓN LIMPIAR con sonido
-            clearBtn.addEventListener('click', () => {
-                playClearSound();
-                textarea.value = '';
-                updateStats();
-                animateTextarea();
-                // feedback extra: un pequeño efecto de brillo en el contenedor
-                const glass = document.querySelector('.glass-card');
-                glass.style.transform = 'scale(0.99)';
-                setTimeout(() => { glass.style.transform = ''; }, 120);
-            });
-
-            // BOTÓN COPIAR
-            copyBtn.addEventListener('click', async () => {
-                playCopySound();
-                const textToCopy = textarea.value;
-                if (!textToCopy) {
-                    // si está vacío, sonido de error sutil
-                    playClickSound(440, 0.1, 0.15);
-                    alert("✨ No hay nada escrito para copiar... ¡escribe algo mágico!");
-                    return;
-                }
-                try {
-                    await navigator.clipboard.writeText(textToCopy);
-                    // éxito: sonido agradable
-                    playMagicSound(); // un pequeño éxito
-                    // mostramos notificación rápida
-                    const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '✅ ¡Copiado!';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalText;
-                    }, 1200);
-                    animateTextarea();
-                } catch (err) {
-                    console.error(err);
-                    playClickSound(300, 0.15, 0.2);
-                    alert("No se pudo copiar :(");
-                }
-            });
-
-            // BOTÓN MÁGICO: inserta una palabra sorpresa o frase inspiradora
-            magicBtn.addEventListener('click', () => {
-                playMagicSound();
-                const frases = [
-                    "🌙 Y bajo la luna morada, todo es posible.",
-                    "💜 Tus pensamientos son constelaciones únicas.",
-                    "✨ El universo te escucha, escribe con el corazón.",
-                    "🎇 Lo que sueñas hoy, florece mañana.",
-                    "🌀 La magia empieza cuando escribes sin miedo.",
-                    "⭐️ Sigue creando, nadie más tiene tu voz.",
-                    "🔮 Este momento es solo tuyo.",
-                    "🎨 Las palabras tienen poder oculto.",
-                    "🌌 La nebulosa de tu mente brilla más que el sol."
-                ];
-                const randomFrase = frases[Math.floor(Math.random() * frases.length)];
-                const currentText = textarea.value;
-                if (currentText.length > 0 && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
-                    textarea.value = currentText + '\n\n' + randomFrase;
-                } else {
-                    textarea.value = currentText + randomFrase;
-                }
-                updateStats();
-                animateTextarea();
-                // destello en el botón
-                magicBtn.style.transform = 'scale(0.96)';
-                setTimeout(() => { magicBtn.style.transform = ''; }, 100);
-                // enfocar textarea
-                textarea.focus();
-            });
-
-            // Inicializar estadísticas
-            updateStats();
-
-            // Generar estrellas de fondo animadas
-            function generateStars() {
-                const container = document.getElementById('stars-container');
-                const starCount = 130;
-                for (let i = 0; i < starCount; i++) {
-                    const star = document.createElement('div');
-                    star.classList.add('star');
-                    const size = Math.random() * 4 + 1;
-                    star.style.width = size + 'px';
-                    star.style.height = size + 'px';
-                    star.style.left = Math.random() * 100 + '%';
-                    star.style.top = Math.random() * 100 + '%';
-                    star.style.animationDuration = Math.random() * 2 + 1.5 + 's';
-                    star.style.animationDelay = Math.random() * 5 + 's';
-                    star.style.opacity = Math.random() * 0.7 + 0.2;
-                    container.appendChild(star);
-                }
+    // actualizar movimiento enemigos (se mueven hacia el jugador pero dentro de su plataforma)
+    function updateEnemiesMovement() {
+        for (let en of enemies) {
+            // dirección hacia jugador
+            let dir = 0;
+            if (player.x + player.width/2 > en.x) dir = 1;
+            else if (player.x + player.width/2 < en.x) dir = -1;
+            let newX = en.x + dir * en.speed;
+            // limitar dentro de los bounds de la plataforma (guardamos referencia)
+            if (newX > en.platBounds.left+5 && newX < en.platBounds.right - en.radius) {
+                en.x = newX;
+            } else {
+                // si topa borde, simplemente no se mueve más allá
+                if (newX <= en.platBounds.left+5) en.x = en.platBounds.left+6;
+                if (newX >= en.platBounds.right - en.radius) en.x = en.platBounds.right - en.radius -1;
             }
-            generateStars();
+        }
+    }
 
-            // Al hacer clic en cualquier lugar de la página también se puede reanudar el audio si está suspendido
-            document.body.addEventListener('click', () => {
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume().then(() => {
-                        console.log('audio reanudado');
-                        // opcional: pequeño pitido de bienvenida
-                        playClickSound(660, 0.08, 0.1);
-                    }).catch(e=>{});
-                }
-            }, { once: true }); // lo intentamos una vez al primer clic global
+    // lógica jugador
+    function handlePlayerMovement() {
+        if (keys.left) { player.vx -= WALK_ACC; player.facingRight = false; }
+        if (keys.right) { player.vx += WALK_ACC; player.facingRight = true; }
+        player.vx *= FRICTION;
+        if (Math.abs(player.vx) < 0.2) player.vx = 0;
+        if (player.vx > MAX_SPEED) player.vx = MAX_SPEED;
+        if (player.vx < -MAX_SPEED) player.vx = -MAX_SPEED;
+        player.x += player.vx;
+        // aplicar gravedad
+        player.vy += GRAVITY;
+        player.y += player.vy;
+        // colisión con plataformas
+        player.grounded = false;
+        for (let plat of platforms) {
+            if (player.y + player.height > plat.y && player.y + player.height < plat.y + 18 &&
+                player.x + player.width > plat.x && player.x < plat.x + plat.w) {
+                player.y = plat.y - player.height;
+                player.vy = 0;
+                player.grounded = true;
+            }
+        }
+        // límites laterales
+        if (player.x < 20) player.x = 20;
+        if (player.x + player.width > canvas.width-20) player.x = canvas.width - player.width -20;
+        // si se cae al vacío (respawn)
+        if (player.y + player.height > canvas.height+50) {
+            respawnPlayerSafe();
+            player.vy = 0;
+        }
+        if (player.y < 0) player.y = 0;
+        // salto
+        if (keys.jump && player.grounded && keys.canJump) {
+            player.vy = JUMP_POWER;
+            player.grounded = false;
+            jumpSound();
+            keys.canJump = false;
+            setTimeout(() => { keys.canJump = true; }, 250);
+        }
+        if (!keys.jump) keys.canJump = true;
+    }
 
-            // Si el usuario interactúa con cualquier botón ya se reanuda automáticamente gracias a las funciones.
-            // Para asegurar que los sonidos funcionen, precargamos el contexto silenciosamente sin molestar
-            // Pero es mejor que el primer clic del usuario active el audio.
-            // También inicializamos audio sin reproducir aún
-            initAudio();
+    // DIBUJAR TODO
+    function drawBackground() {
+        const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+        let r = 20 + (1-skyDarkness)*35;
+        let g = 15 + (1-skyDarkness)*25;
+        let b = 50 + (1-skyDarkness)*40;
+        let darkR = 8, darkG = 2, darkB = 20;
+        grad.addColorStop(0, `rgb(${r*(1-skyDarkness)+darkR*skyDarkness}, ${g*(1-skyDarkness)+darkG*skyDarkness}, ${b*(1-skyDarkness)+darkB*skyDarkness})`);
+        grad.addColorStop(1, `rgb(3, 2, 20)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        // estrellas
+        for(let i=0;i<100;i++) {
+            if (Math.random()<0.03) {
+                ctx.fillStyle = `rgba(255,240,200,${0.3+skyDarkness*0.5})`;
+                ctx.fillRect( (i*131)%canvas.width, (i*57)%canvas.height, 2,2);
+            }
+        }
+    }
 
-            // añadir efecto hover y sonido opcional: no se pidió hover con sonido, pero los botones ya hacen click al presionar.
-            // Estilo extra: movimiento de onda cuando se enfoca
-            textarea.addEventListener('focus', () => {
-                playClickSound(880, 0.05, 0.08); // sonido muy sutil foco
-            });
-        })();
-    </script>
+    function drawPlatforms() {
+        for (let plat of platforms) {
+            ctx.fillStyle = "#2c244f";
+            ctx.shadowBlur = 6;
+            ctx.fillRect(plat.x, plat.y-8, plat.w, 12);
+            ctx.fillStyle = "#5a46a5";
+            ctx.fillRect(plat.x, plat.y-5, plat.w, 8);
+            ctx.fillStyle = "#8f7ad0";
+            ctx.fillRect(plat.x+5, plat.y-12, plat.w-10, 6);
+            ctx.fillStyle = "#b59eff";
+            ctx.fillRect(plat.x+10, plat.y-15, plat.w-20, 4);
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function drawPlayer() {
+        ctx.save();
+        if (!player.facingRight) {
+            ctx.translate(player.x+player.width/2, player.y+player.height/2);
+            ctx.scale(-1,1);
+            ctx.translate(-(player.x+player.width/2), -(player.y+player.height/2));
+        }
+        ctx.fillStyle = "#ffdd99";
+        ctx.shadowBlur = 8;
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.fillStyle = "#fdba3a";
+        ctx.fillRect(player.x+4, player.y-5, 5, 8);
+        ctx.fillRect(player.x+player.width-9, player.y-5, 5, 8);
+        ctx.fillStyle = "#000";
+        ctx.fillRect(player.x+4, player.y+6, 4, 5);
+        ctx.fillRect(player.x+player.width-8, player.y+6, 4, 5);
+        ctx.restore();
+        ctx.shadowBlur = 0;
+    }
+
+    function drawEnemies() {
+        for (let en of enemies) {
+            ctx.fillStyle = "#d64545";
+            ctx.shadowBlur = 4;
+            ctx.beginPath();
+            ctx.arc(en.x, en.y-3, en.radius-2, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#8b0000";
+            ctx.beginPath();
+            ctx.arc(en.x-5, en.y-8, 3, 0, Math.PI*2);
+            ctx.arc(en.x+5, en.y-8, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(en.x-6, en.y-9, 1, 0, Math.PI*2);
+            ctx.arc(en.x+4, en.y-9, 1, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#200000";
+            ctx.fillRect(en.x-8, en.y-2, 16, 4);
+        }
+        ctx.shadowBlur=0;
+    }
+
+    // ciclo de animación
+    function updateGame() {
+        if (!gameRunning) return;
+        handlePlayerMovement();
+        updateEnemiesMovement();
+        // evitar bugs cuando no hay enemigos pero se llama nextLevel desde fuera
+        if (enemies.length === 0 && !levelClearing && !infiniteMode && currentLevel<10) {
+            // ya se llama en el click pero por si acaso
+        }
+    }
+
+    function render() {
+        drawBackground();
+        drawPlatforms();
+        drawEnemies();
+        drawPlayer();
+        // texto adicional
+        ctx.font = "bold 16monospace";
+        ctx.fillStyle = "#f1e3ff";
+        ctx.shadowBlur = 0;
+        if (infiniteMode) {
+            ctx.font = "bold 18px 'Segoe UI'";
+            ctx.fillStyle = "#ffb2ff";
+            ctx.fillText("♾️ infinite levels, like my infinite sorry ♾️", canvas.width/2-210, 35);
+        }
+    }
+
+    function gameLoop() {
+        updateGame();
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // eventos teclado
+    function handleKeyDown(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
+            e.preventDefault();
+            keys.jump = true;
+        }
+    }
+    function handleKeyUp(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
+            keys.jump = false;
+        }
+    }
+
+    // inicializar juego
+    function initGame() {
+        currentLevel = 1;
+        infiniteMode = false;
+        levelSpan.innerText = 1;
+        skyDarkness = 0;
+        updateSkyDarkness();
+        spawnEnemiesForLevel();
+        updateEnemiesUI();
+        respawnPlayerSafe();
+        gameRunning = true;
+        levelClearing = false;
+        phraseDiv.innerHTML = "⚔️ Click en enemigos para eliminarlos. Salta entre edificios ⚔️";
+        infinityLabel.style.display = 'none';
+        const oldBtn = document.getElementById('infiniteModeBtn');
+        if(oldBtn) oldBtn.remove();
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        canvas.addEventListener('click', handleCanvasClick);
+        gameLoop();
+    }
+
+    // botón hola de nuevo
+    document.getElementById('holaBtn').addEventListener('click', () => {
+        clickUISound();
+        alert("✨ ¡Hola de nuevo! Espero que disfrutes esta sorpresa interactiva ✨");
+    });
+
+    // iniciamos
+    initGame();
+</script>
 </body>
 </html>
