@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>✨He dejado esto para ti✨</title>
+    <title>✨ Portal Sombrío · Juego de los 10 Niveles ✨</title>
     <style>
         * {
             margin: 0;
@@ -33,6 +33,7 @@
             border: 1px solid rgba(130, 90, 240, 0.6);
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             transition: all 0.2s;
+            position: relative;
         }
 
         /* BOTÓN DE ENTRADA (grande y llamativo) */
@@ -167,6 +168,51 @@
             border-radius: 70px;
             max-width: 90%;
         }
+
+        /* Botón de música flotante */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(20, 15, 60, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #a47eff;
+            z-index: 200;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .music-control button {
+            background: #6c4eff;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            border-radius: 50px;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.1s;
+            box-shadow: 0 2px 5px black;
+        }
+        .music-control button:active {
+            transform: scale(0.95);
+        }
+        .music-status {
+            color: #e6ccff;
+            font-size: 0.75rem;
+        }
+        @media (max-width: 600px) {
+            .music-control { padding: 5px 12px; gap: 6px; }
+            .music-control button { width: 30px; height: 30px; font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -179,9 +225,10 @@
     <div class="message-box" id="customMessageBox">
         <p id="editableParagraph">
             🌙 <strong>Mensaje personal:</strong><br>
-            Gracias por confiar tanto tiempo en mi, hemos pasado juntos muchas cosas y he tenido muchos momentos contigo que nunca supe apreciar. Lo siento, siento que hayas tenido que desaparecer tanto de las redes, siento volver a encontrarte, siento dejarte esto si por ello te vuelvo a hacer daño, pero no esta en mis planes dejarte tirado, quiero que no tengas la imagen de mi de ese hijo de puta, quiero que sepas que de verdad te valore como amigo, y te sigo valorando, porque para mi sigues estando en mis mejores amigos.
+            Puedes editar este párrafo directamente en el código fuente, dentro de la etiqueta con id "editableParagraph".<br>
+            Escribe lo que quieras compartir. Cada palabra tuya vive aquí. ✨💜
         </p>
-        <div class="edit-note">(espero que lo entiendas&gt;)</div>
+        <div class="edit-note">✏️ (Edita este texto en el HTML, dentro de &lt;p id="editableParagraph"&gt;)</div>
     </div>
 
     <!-- ZONA DEL JUEGO (inicialmente oculta) -->
@@ -206,31 +253,158 @@
 <!-- Capa de fundido a negro para frases -->
 <div id="fadeOverlay" class="fade-overlay"><span id="fadeText"></span></div>
 
+<!-- Control de música (flotante) -->
+<div class="music-control" id="musicControl" style="display: none;">
+    <span>🎵</span>
+    <button id="musicToggleBtn">🔊</button>
+    <span class="music-status" id="musicStatusText">melancolía activa</span>
+</div>
+
 <script>
     // --------------------------------------------------------------
     // 1. FRASES PERSONALIZABLES (cambia aquí el texto de cada nivel)
-    //    Cada vez que completas un nivel (1->2, 2->3 ... 9->10) aparece una frase.
-    //    Después del nivel 10, dos frases finales.
     // --------------------------------------------------------------
     const levelUpPhrases = {
-        1: " Es divertido! verdad? ",
-        2: " no entiendo de que se quejan ",
-        3: " solo nos estamos divirtiendo, verdad? ",
-        4: " no creo que sea para tanto... ",
-        5: " deberian de ser mas duros! ",
-        6: " porque son asi? ",
-        7: "creo que les duele... ",
-        8: " deberia parar... ",
-        9: " de verdad no tengo yo el problema? "
+        1: "🌒 Nivel 1: La sombra se despierta...",
+        2: "🌓 Nivel 2: Entre grietas y silencios",
+        3: "🌔 Nivel 3: La noche teje sus hilos",
+        4: "🌕 Nivel 4: El eco responde",
+        5: "🌖 Nivel 5: Caída en la penumbra",
+        6: "🌗 Nivel 6: Edificios como cuchillas",
+        7: "🌘 Nivel 7: El vacío observa",
+        8: "🌑 Nivel 8: Sólo tu espada de clics",
+        9: "💀 Nivel 9: El cielo se vuelve tinta"
     };
     const finalPhrases = [
-        " Lo siento.",
-        " El problema lo he tenido yo todo este tiempo, lo siento mucho. "
+        "🏆 ¡HAS SUPERADO LOS 10 NIVELES! 🏆",
+        "🌌 'La oscuridad te abraza, héroe de los clics' 🌌"
     ];
-    // Puedes cambiar el texto de las frases manteniendo las comillas.
-    // -----------------------------------------------------------------
-
-    // ---------- AUDIO (Web Audio) ----------
+    
+    // ---------- MÚSICA DE FONDO EMOTIVA (sintetizada con Web Audio) ----------
+    // Crea un ambiente melancólico con acordes menores y filtros suaves.
+    let bgMusicNodes = {
+        gain: null,
+        filter: null,
+        osc1: null,
+        osc2: null,
+        osc3: null,
+        chordInterval: null,
+        isMuted: false,
+        previousVolume: 0.15,
+        ctx: null
+    };
+    
+    function initBackgroundMusic(audioCtx) {
+        if (!audioCtx) return false;
+        if (bgMusicNodes.gain) return true; // ya iniciada
+        
+        bgMusicNodes.ctx = audioCtx;
+        // Nodo de ganancia principal (volumen)
+        const masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.14; // volumen bajo y ambiental
+        bgMusicNodes.gain = masterGain;
+        
+        // Filtro lowpass para dar sensación de lejanía/emoción
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 750;
+        filter.Q.value = 4.5;
+        bgMusicNodes.filter = filter;
+        
+        masterGain.connect(filter);
+        filter.connect(audioCtx.destination);
+        
+        // Función para crear oscilador con forma de onda suave
+        const createOsc = (freq, detuneVal = 0) => {
+            const osc = audioCtx.createOscillator();
+            osc.type = "sine";          // sine = cálido y triste
+            osc.frequency.value = freq;
+            osc.detune.value = detuneVal;
+            osc.connect(masterGain);
+            osc.start();
+            return osc;
+        };
+        
+        // Acorde inicial: La menor (A3 - C4 - E4)
+        bgMusicNodes.osc1 = createOsc(220, 0);     // A3
+        bgMusicNodes.osc2 = createOsc(261.63, -4); // C4 ligeramente desafinado para calidez
+        bgMusicNodes.osc3 = createOsc(329.63, 3);  // E4
+        
+        // Progresión de acordes emotiva y melancólica: Am → Em → Dm → (de nuevo)
+        const chordProgression = [
+            { freqs: [220, 261.63, 329.63], label: "Am" },   // La menor (tristeza base)
+            { freqs: [164.81, 196.00, 246.94], label: "Em" }, // Mi menor
+            { freqs: [146.83, 174.61, 220], label: "Dm" },    // Re menor
+            { freqs: [174.61, 220, 261.63], label: "F" }      // Fa mayor (toque esperanzador)
+        ];
+        
+        let chordIdx = 0;
+        // Cambiar acorde cada 7.5 segundos (ritmo lento y nostálgico)
+        bgMusicNodes.chordInterval = setInterval(() => {
+            if (!bgMusicNodes.ctx || bgMusicNodes.ctx.state !== 'running') return;
+            if (!bgMusicNodes.osc1 || !bgMusicNodes.osc2 || !bgMusicNodes.osc3) return;
+            chordIdx = (chordIdx + 1) % chordProgression.length;
+            const chord = chordProgression[chordIdx];
+            // Suavemente cambiar frecuencias (transición orgánica)
+            bgMusicNodes.osc1.frequency.setTargetAtTime(chord.freqs[0], bgMusicNodes.ctx.currentTime, 0.2);
+            bgMusicNodes.osc2.frequency.setTargetAtTime(chord.freqs[1], bgMusicNodes.ctx.currentTime, 0.2);
+            bgMusicNodes.osc3.frequency.setTargetAtTime(chord.freqs[2], bgMusicNodes.ctx.currentTime, 0.2);
+            // Pequeño movimiento en el filtro para dar aire
+            bgMusicNodes.filter.frequency.setTargetAtTime(650 + Math.random() * 150, bgMusicNodes.ctx.currentTime, 0.3);
+            setTimeout(() => {
+                if (bgMusicNodes.filter) bgMusicNodes.filter.frequency.setTargetAtTime(750, bgMusicNodes.ctx.currentTime, 0.5);
+            }, 400);
+        }, 7500);
+        
+        return true;
+    }
+    
+    function stopBackgroundMusic() {
+        if (bgMusicNodes.chordInterval) {
+            clearInterval(bgMusicNodes.chordInterval);
+            bgMusicNodes.chordInterval = null;
+        }
+        if (bgMusicNodes.osc1) {
+            try { bgMusicNodes.osc1.stop(); bgMusicNodes.osc1.disconnect(); } catch(e) {}
+            bgMusicNodes.osc1 = null;
+        }
+        if (bgMusicNodes.osc2) {
+            try { bgMusicNodes.osc2.stop(); bgMusicNodes.osc2.disconnect(); } catch(e) {}
+            bgMusicNodes.osc2 = null;
+        }
+        if (bgMusicNodes.osc3) {
+            try { bgMusicNodes.osc3.stop(); bgMusicNodes.osc3.disconnect(); } catch(e) {}
+            bgMusicNodes.osc3 = null;
+        }
+        if (bgMusicNodes.gain) {
+            bgMusicNodes.gain.disconnect();
+            bgMusicNodes.gain = null;
+        }
+        if (bgMusicNodes.filter) {
+            bgMusicNodes.filter.disconnect();
+            bgMusicNodes.filter = null;
+        }
+        bgMusicNodes.ctx = null;
+    }
+    
+    function toggleMusicMute() {
+        if (!bgMusicNodes.gain) return false;
+        if (bgMusicNodes.isMuted) {
+            bgMusicNodes.gain.gain.value = bgMusicNodes.previousVolume;
+            bgMusicNodes.isMuted = false;
+            document.getElementById('musicToggleBtn').innerHTML = '🔊';
+            document.getElementById('musicStatusText').innerText = 'melancolía activa';
+        } else {
+            bgMusicNodes.previousVolume = bgMusicNodes.gain.gain.value;
+            bgMusicNodes.gain.gain.value = 0;
+            bgMusicNodes.isMuted = true;
+            document.getElementById('musicToggleBtn').innerHTML = '🔇';
+            document.getElementById('musicStatusText').innerText = 'música en silencio';
+        }
+        return true;
+    }
+    
+    // ---------- AUDIO (EFECTOS) ----------
     let audioCtx = null;
     function initAudio() {
         if (audioCtx) return audioCtx;
@@ -262,8 +436,8 @@
     function jumpSound() { playSound(560, 0.12, 0.2, 'sine'); }
     function levelUpSound() { playSound(880, 0.2, 0.3); setTimeout(()=>playSound(660,0.2,0.2),100); }
     function uiClick() { playSound(700, 0.06, 0.15); }
-
-    // ---------- Mostrar frase con fade a negro ----------
+    
+    // Mostrar frase con fade a negro
     const overlay = document.getElementById('fadeOverlay');
     const fadeTextSpan = document.getElementById('fadeText');
     function showFullscreenPhrase(text, callback) {
@@ -275,26 +449,24 @@
             setTimeout(() => {
                 if (callback) callback();
             }, 800);
-        }, 1800); // la frase se ve grande 1.8 segundos y se desvanece
+        }, 1800);
     }
-
+    
     // ---------- Variables del juego ----------
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctxCanvas = canvas.getContext('2d');
     const levelSpan = document.getElementById('currentLevelNum');
     const enemiesSpan = document.getElementById('enemiesRemain');
     const gameStateSpan = document.getElementById('gameStateMsg');
     const infinityLabel = document.getElementById('infinityModeLabel');
     const phraseDisplayDiv = document.getElementById('phraseDisplay');
-
+    
     let gameRunning = true;
     let currentLevel = 1;
     let enemies = [];
     let infiniteMode = false;
-    let levelTransitionLock = false;  // evita múltiples transiciones
-    let waitingForInfinityBtn = false;
-
-    // --- jugador ---
+    let levelTransitionLock = false;
+    
     let player = {
         x: 200, y: 0, vx: 0, vy: 0,
         width: 20, height: 24,
@@ -306,8 +478,7 @@
     const WALK_ACC = 0.8;
     const MAX_SPEED = 5;
     const FRICTION = 0.92;
-
-    // Plataformas (edificios)
+    
     const platforms = [
         { x: 60, y: 380, w: 120 },
         { x: 250, y: 360, w: 140 },
@@ -315,25 +486,21 @@
         { x: 710, y: 350, w: 140 },
         { x: 900, y: 380, w: 100 }
     ];
-
-    // controles
+    
     const keys = { left: false, right: false, jump: false, canJump: true };
-
-    // niveles: cantidad de enemigos por nivel (del 1 al 10)
+    
     const enemyCountByLevel = [0,2,3,4,5,6,7,8,9,10,12];
     function getEnemySpeed(level) {
         return 0.9 + (level-1) * 0.12;
     }
-
-    // oscuridad del cielo (a más nivel, más negro)
+    
     let skyDarkness = 0;
     function updateSkyDarkness() {
         let progress = (currentLevel-1)/9;
         if (currentLevel >= 10) progress = 1;
         skyDarkness = Math.min(1, progress);
     }
-
-    // Spawn enemigos en plataformas
+    
     function spawnEnemiesForLevel() {
         const count = enemyCountByLevel[currentLevel] || 3;
         const speedVal = getEnemySpeed(currentLevel);
@@ -352,7 +519,7 @@
         enemies = newEnemies;
         enemiesSpan.innerText = enemies.length;
     }
-
+    
     function respawnPlayerSafe() {
         let closest = platforms[0];
         let minDist = Math.abs(player.x - (closest.x+closest.w/2));
@@ -366,20 +533,17 @@
         player.vx = 0;
         player.grounded = true;
     }
-
-    // lógica para pasar de nivel (con frase y fade)
+    
     function advanceToNextLevel() {
         if (levelTransitionLock) return;
         levelTransitionLock = true;
-
+        
         if (!infiniteMode && currentLevel === 10) {
-            // FINAL DEL JUEGO: mostrar dos frases seguidas con fade
             gameStateSpan.innerText = "VICTORIA";
             phraseDisplayDiv.innerHTML = "✨ ¡CAMPEÓN! ✨";
             levelUpSound();
             showFullscreenPhrase(finalPhrases[0], () => {
                 showFullscreenPhrase(finalPhrases[1], () => {
-                    // Mostrar botón de modo infinito si no existe
                     if (!document.getElementById('infinityModeBtn')) {
                         const btnInf = document.createElement('button');
                         btnInf.id = 'infinityModeBtn';
@@ -403,10 +567,8 @@
             });
             return;
         }
-
-        // Modo normal o infinito
+        
         if (infiniteMode) {
-            // infinito: sube nivel cíclico sin frases, solo actualizar
             let next = currentLevel + 1;
             if (next > 10) next = 1;
             currentLevel = next;
@@ -419,8 +581,7 @@
             levelTransitionLock = false;
             return;
         }
-
-        // MODO NORMAL: sube nivel y muestra frase
+        
         const oldLevel = currentLevel;
         currentLevel++;
         if (currentLevel > 10) currentLevel = 10;
@@ -428,8 +589,8 @@
         updateSkyDarkness();
         spawnEnemiesForLevel();
         enemiesSpan.innerText = enemies.length;
-
-        const phraseKey = currentLevel-1; // porque frase se muestra al pasar del 1 al 2, etc.
+        
+        const phraseKey = currentLevel-1;
         let phraseToShow = levelUpPhrases[phraseKey] || `✨ Nivel ${currentLevel} · avanza ✨`;
         gameStateSpan.innerText = "Nuevo nivel";
         levelUpSound();
@@ -439,8 +600,7 @@
             levelTransitionLock = false;
         });
     }
-
-    // Iniciar modo infinito
+    
     function startInfiniteMode() {
         infiniteMode = true;
         currentLevel = 1;
@@ -452,12 +612,10 @@
         phraseDisplayDiv.innerHTML = "♾️ INFINITE LEVELS, LIKE MY INFINITE SORRY ♾️";
         gameStateSpan.innerText = "∞ INFINITO ∞";
         levelTransitionLock = false;
-        waitingForInfinityBtn = false;
         const oldBtn = document.getElementById('infinityModeBtn');
         if(oldBtn) oldBtn.remove();
     }
-
-    // Matar enemigos con click
+    
     function handleCanvasClick(e) {
         if (!gameRunning) return;
         const rect = canvas.getBoundingClientRect();
@@ -483,8 +641,7 @@
             playSound(430,0.05,0.1);
         }
     }
-
-    // movimiento enemigos
+    
     function updateEnemies() {
         for (let en of enemies) {
             let dir = 0;
@@ -499,15 +656,13 @@
             }
         }
     }
-
-    // movimiento jugador
+    
     function handlePlayer() {
         if (keys.left) { player.vx -= WALK_ACC; player.facingRight = false; }
         if (keys.right) { player.vx += WALK_ACC; player.facingRight = true; }
         player.vx *= FRICTION;
         player.vx = Math.min(MAX_SPEED, Math.max(-MAX_SPEED, player.vx));
         player.x += player.vx;
-
         player.vy += GRAVITY;
         player.y += player.vy;
         player.grounded = false;
@@ -523,7 +678,7 @@
         if (player.x + player.width > canvas.width-20) player.x = canvas.width - player.width -20;
         if (player.y + player.height > canvas.height+80) respawnPlayerSafe();
         if (player.y < 0) player.y = 0;
-
+        
         if (keys.jump && player.grounded && keys.canJump) {
             player.vy = JUMP_POWER;
             player.grounded = false;
@@ -533,86 +688,85 @@
         }
         if (!keys.jump) keys.canJump = true;
     }
-
-    // ------- DIBUJADO -------
+    
+    // dibujado
     function drawBackground() {
-        const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+        const grad = ctxCanvas.createLinearGradient(0,0,0,canvas.height);
         let r = 20 + (1-skyDarkness)*35;
         let g = 15 + (1-skyDarkness)*25;
         let b = 50 + (1-skyDarkness)*45;
         let darkR = 5, darkG = 0, darkB = 18;
         grad.addColorStop(0, `rgb(${r*(1-skyDarkness)+darkR*skyDarkness}, ${g*(1-skyDarkness)+darkG*skyDarkness}, ${b*(1-skyDarkness)+darkB*skyDarkness})`);
         grad.addColorStop(1, `rgb(3, 2, 18)`);
-        ctx.fillStyle = grad;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctxCanvas.fillStyle = grad;
+        ctxCanvas.fillRect(0,0,canvas.width,canvas.height);
         for(let i=0;i<120;i++) {
             if (Math.random()<0.04) {
-                ctx.fillStyle = `rgba(255,230,200,${0.2+skyDarkness*0.4})`;
-                ctx.fillRect( (i*181)%canvas.width, (i*73)%canvas.height, 2,2);
+                ctxCanvas.fillStyle = `rgba(255,230,200,${0.2+skyDarkness*0.4})`;
+                ctxCanvas.fillRect( (i*181)%canvas.width, (i*73)%canvas.height, 2,2);
             }
         }
     }
-
+    
     function drawPlatforms() {
         for (let plat of platforms) {
-            ctx.fillStyle = "#352d66";
-            ctx.fillRect(plat.x, plat.y-8, plat.w, 12);
-            ctx.fillStyle = "#6c56b0";
-            ctx.fillRect(plat.x, plat.y-5, plat.w, 8);
-            ctx.fillStyle = "#a085ff";
-            ctx.fillRect(plat.x+5, plat.y-12, plat.w-10, 6);
+            ctxCanvas.fillStyle = "#352d66";
+            ctxCanvas.fillRect(plat.x, plat.y-8, plat.w, 12);
+            ctxCanvas.fillStyle = "#6c56b0";
+            ctxCanvas.fillRect(plat.x, plat.y-5, plat.w, 8);
+            ctxCanvas.fillStyle = "#a085ff";
+            ctxCanvas.fillRect(plat.x+5, plat.y-12, plat.w-10, 6);
         }
     }
-
+    
     function drawPlayer() {
-        ctx.save();
+        ctxCanvas.save();
         if (!player.facingRight) {
-            ctx.translate(player.x+player.width/2, player.y+player.height/2);
-            ctx.scale(-1,1);
-            ctx.translate(-(player.x+player.width/2), -(player.y+player.height/2));
+            ctxCanvas.translate(player.x+player.width/2, player.y+player.height/2);
+            ctxCanvas.scale(-1,1);
+            ctxCanvas.translate(-(player.x+player.width/2), -(player.y+player.height/2));
         }
-        ctx.fillStyle = "#ffdb8e";
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-        ctx.fillStyle = "#f5b042";
-        ctx.fillRect(player.x+4, player.y-6, 5, 9);
-        ctx.fillRect(player.x+player.width-9, player.y-6, 5, 9);
-        ctx.fillStyle = "#221c00";
-        ctx.fillRect(player.x+4, player.y+6, 4, 6);
-        ctx.fillRect(player.x+player.width-8, player.y+6, 4, 6);
-        ctx.restore();
+        ctxCanvas.fillStyle = "#ffdb8e";
+        ctxCanvas.fillRect(player.x, player.y, player.width, player.height);
+        ctxCanvas.fillStyle = "#f5b042";
+        ctxCanvas.fillRect(player.x+4, player.y-6, 5, 9);
+        ctxCanvas.fillRect(player.x+player.width-9, player.y-6, 5, 9);
+        ctxCanvas.fillStyle = "#221c00";
+        ctxCanvas.fillRect(player.x+4, player.y+6, 4, 6);
+        ctxCanvas.fillRect(player.x+player.width-8, player.y+6, 4, 6);
+        ctxCanvas.restore();
     }
-
+    
     function drawEnemies() {
         for (let en of enemies) {
-            ctx.fillStyle = "#d64545";
-            ctx.beginPath();
-            ctx.arc(en.x, en.y-4, en.radius-2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#610000";
-            ctx.beginPath();
-            ctx.arc(en.x-5, en.y-9, 3, 0, Math.PI*2);
-            ctx.arc(en.x+5, en.y-9, 3, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(en.x-6, en.y-10, 1.2, 0, Math.PI*2);
-            ctx.arc(en.x+4, en.y-10, 1.2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#3a0000";
-            ctx.fillRect(en.x-8, en.y-3, 16, 4);
+            ctxCanvas.fillStyle = "#d64545";
+            ctxCanvas.beginPath();
+            ctxCanvas.arc(en.x, en.y-4, en.radius-2, 0, Math.PI*2);
+            ctxCanvas.fill();
+            ctxCanvas.fillStyle = "#610000";
+            ctxCanvas.beginPath();
+            ctxCanvas.arc(en.x-5, en.y-9, 3, 0, Math.PI*2);
+            ctxCanvas.arc(en.x+5, en.y-9, 3, 0, Math.PI*2);
+            ctxCanvas.fill();
+            ctxCanvas.fillStyle = "white";
+            ctxCanvas.beginPath();
+            ctxCanvas.arc(en.x-6, en.y-10, 1.2, 0, Math.PI*2);
+            ctxCanvas.arc(en.x+4, en.y-10, 1.2, 0, Math.PI*2);
+            ctxCanvas.fill();
+            ctxCanvas.fillStyle = "#3a0000";
+            ctxCanvas.fillRect(en.x-8, en.y-3, 16, 4);
         }
     }
-
+    
     function drawUItext() {
         if (infiniteMode) {
-            ctx.font = "bold 20px 'Segoe UI'";
-            ctx.fillStyle = "#ffbbff";
-            ctx.shadowBlur = 0;
-            ctx.fillText("♾️ infinite levels, like my infinite sorry ♾️", canvas.width/2-280, 40);
+            ctxCanvas.font = "bold 20px 'Segoe UI'";
+            ctxCanvas.fillStyle = "#ffbbff";
+            ctxCanvas.shadowBlur = 0;
+            ctxCanvas.fillText("♾️ infinite levels, like my infinite sorry ♾️", canvas.width/2-280, 40);
         }
     }
-
-    // ciclo principal
+    
     function updateGame() {
         if (!gameRunning) return;
         handlePlayer();
@@ -630,18 +784,32 @@
         render();
         requestAnimationFrame(gameLoop);
     }
-
-    // ----- Inicialización cuando se hace clic en el botón de entrada -----
-    function startGameAfterEntry() {
-        // mostrar área de juego
+    
+    // ----- Arrancar juego + música emotiva -----
+    async function startGameAfterEntry() {
         document.getElementById('gameArea').style.display = 'block';
-        // ocultar el contenedor del botón (opcional)
         document.querySelector('.entry-button-container').style.display = 'none';
+        document.getElementById('musicControl').style.display = 'flex';
+        
+        // Inicializar contexto de audio y música de fondo
+        const ctxAudio = initAudio();
+        if (ctxAudio) {
+            try {
+                await ctxAudio.resume();
+                const musicStarted = initBackgroundMusic(ctxAudio);
+                if (musicStarted && bgMusicNodes.gain) {
+                    bgMusicNodes.gain.gain.value = 0.14;
+                    bgMusicNodes.isMuted = false;
+                    document.getElementById('musicToggleBtn').innerHTML = '🔊';
+                    document.getElementById('musicStatusText').innerText = 'melancolía activa';
+                }
+            } catch(e) { console.warn("error iniciando música", e); }
+        }
+        
         // inicializar juego
         currentLevel = 1;
         infiniteMode = false;
         levelTransitionLock = false;
-        waitingForInfinityBtn = false;
         skyDarkness = 0;
         updateSkyDarkness();
         levelSpan.innerText = 1;
@@ -653,7 +821,7 @@
         infinityLabel.style.display = 'none';
         const oldBtn = document.getElementById('infinityModeBtn');
         if(oldBtn) oldBtn.remove();
-        // eventos
+        
         canvas.addEventListener('click', handleCanvasClick);
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
@@ -670,11 +838,15 @@
         });
         gameLoop();
     }
-
-    // botón de entrada
+    
+    // Eventos entrada y música
     document.getElementById('entryBtn').addEventListener('click', () => {
         uiClick();
         startGameAfterEntry();
+    });
+    document.getElementById('musicToggleBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMusicMute();
     });
 </script>
 </body>
